@@ -4,23 +4,25 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
 
-    public Client() {
+    public Client() throws IOException {
         initConnection();
         initReceiver();
+        sendMessage();
     }
 
     private void initConnection() {
         try {
             socket = new Socket("localhost", 8080);
-            this.in = new DataInputStream(socket.getInputStream());
-            this.out = new DataOutputStream(socket.getOutputStream());
-            System.out.println("Conection established " + socket.getInetAddress());
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            System.out.println("Connection established " + socket.getInetAddress());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,7 +45,14 @@ public class Client {
         System.out.println("receiver started");
     }
 
-    public static void main(String[] args) {
-        new Client();
+    private void sendMessage() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        while (true)
+            out.writeUTF(scanner.next());
+    }
+
+    public static void main(String[] args) throws IOException {
+        Client client = new Client();
+//        client.sendMessage();
     }
 }
