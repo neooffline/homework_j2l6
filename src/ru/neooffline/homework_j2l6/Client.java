@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 public class Client {
     private Socket socket;
-    private DataInputStream in;
-    private DataOutputStream out;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
 
     public Client() throws IOException {
         initConnection();
@@ -20,9 +20,9 @@ public class Client {
     private void initConnection() {
         try {
             socket = new Socket("localhost", 8080);
-            in = new DataInputStream(socket.getInputStream());
-            out = new DataOutputStream(socket.getOutputStream());
-            System.out.println("Connection established " + socket.getInetAddress());
+            inputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
+            System.out.println("Connection established " + socket);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,8 +32,8 @@ public class Client {
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
-                    String echoMessage = in.readUTF();
-                    System.out.println(echoMessage);
+                    String message = inputStream.readUTF();
+                    System.out.println("Message received from server::" + message);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -42,17 +42,19 @@ public class Client {
         });
         thread.setDaemon(true);
         thread.start();
-        System.out.println("receiver started");
+        System.out.println("Receiver started on::" + Thread.currentThread());
     }
 
     private void sendMessage() throws IOException {
         Scanner scanner = new Scanner(System.in);
-        while (true)
-            out.writeUTF(scanner.next());
+        while (true) {
+            String outMessage = scanner.next();
+            outputStream.writeUTF(outMessage);
+            System.out.println("Message sent to server::" + outMessage);
+        }
     }
 
     public static void main(String[] args) throws IOException {
-        Client client = new Client();
-//        client.sendMessage();
+        new Client();
     }
 }

@@ -10,10 +10,10 @@ import java.util.Scanner;
 public class Server {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
+    private Scanner scanner;
 
-    Server() throws IOException {
+    Server() {
         initServer();
-        sendMessageToClient();
     }
 
     private void initServer() {
@@ -21,22 +21,31 @@ public class Server {
             System.out.println("Server started");
             Socket socket = ss.accept();
             System.out.println("Client connected: " + socket.getInetAddress());
-            if (socket != null) {
-                this.inputStream = new DataInputStream(socket.getInputStream());
-                this.outputStream = new DataOutputStream(socket.getOutputStream());
+            try {
+                inputStream = new DataInputStream(socket.getInputStream());
+                outputStream = new DataOutputStream(socket.getOutputStream());
+                scanner = new Scanner(System.in);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             while (true) {
-                String message = inputStream.readUTF();
-                System.out.println("reciecve " + message);
+                String inputMessage = inputStream.readUTF();
+                System.out.println("Message received from client:: " + inputMessage);
+                try {
+                    String outputMessage = scanner.next();
+                    outputStream.writeUTF(outputMessage);
+                    System.out.println("Message sent to client::" + outputMessage);
+                } catch (IOException io) {
+                    io.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void sendMessageToClient() throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        while (true)
-            outputStream.writeUTF(scanner.next());
+    public static void main(String[] args) {
+        System.out.println("Server started on::" + Thread.currentThread());
+        new Server();
     }
 }
